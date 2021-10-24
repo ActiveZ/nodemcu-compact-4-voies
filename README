@@ -1,0 +1,14 @@
+Pour nodeMCU compact
+
+- upload fichier avec ftdi en 5 v
+- sur carte nodeMCU: shunter IO0 avec GND par jumper
+- mettre Rx sur Tx et inversement
+- ne pas oublier d'enlever le jumper à pres upload
+
+relay -> pin 5
+LED -> pin 16
+
+test avec alim usb
+
+infos:
+https://fr.aliexpress.com/item/1005001651180110.html?spm=a2g0o.productlist.0.0.69752deegrDb9J&algo_pvid=95285217-ec77-4c2b-8fab-971a1aa1d2ed&algo_exp_id=95285217-ec77-4c2b-8fab-971a1aa1d2ed-23&pdp_ext_f=%7B%22sku_id%22%3A%2212000017011631427%22%7D

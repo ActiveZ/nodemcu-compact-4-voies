@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="" />
+  </head>
+  <style>
+    html,
+    body {
+      margin: 0px;
+    }
+
+    main {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      /* background: url("../soap-bubbles-fond.jpg") center; */
+      /* background-size: cover; */
+      /* border: 1px solid black; */
+    }
+
+    button {
+      height: 20vh;
+      width: 20vh;
+      border-radius: 50%;
+    }
+
+    input {
+      width: 100px;
+    }
+  </style>
+
+  <body>
+    <main>
+      <div>
+        <button
+          id="btBubbleOn"
+          style="background-color: lightgreen"
+          onClick="bubblesOn()"
+        >
+          on
+        </button>
+        <button onClick="bubblesOff()">off</button>
+      </div>
+
+      <div>
+        <button id="btBubbleTimer" onClick="bubblesTimer()">timer</button><br />
+        <label style="color: white" for="duration">timer (s)</label><br />
+        <input id="duration" type="number" name="duration" min="1" value="3" />
+      </div>
+
+      <div>
+        <button onClick="bubblesBlink()">blink</button><br />
+        <label style="color: white" for="duration">durée on (s)</label><br />
+        <input
+          id="durationBlinkOn"
+          type="number"
+          name="durationBlinkOn"
+          min="1"
+          value="3"
+        /><br />
+        <label style="color: white" for="duration">durée off (s)</label><br />
+        <input
+          id="durationBlinkOff"
+          type="number"
+          name="durationBlinkOff"
+          min="1"
+          value="3"
+        />
+      </div>
+
+      <div>
+        <button onClick="addIP()" disabled>Add IP</button>
+        <button onClick="getIP()">Get IP</button>
+      </div>
+    </main>
+
+    <script>
+      const URL = "http://frugysoft.freeboxos.fr:8284";
+      let myIP = "";
+      let timeLeft = 0;
+      let myTimer;
+
+      /////////////////////////////////////////////////////////////
+      /////////////////// NODEMCU ESP 8266 ////////////////////////
+      /////////////////////////////////////////////////////////////
+
+      ////////////////////////// ON ///////////////////////////////
+
+      function bubblesOn() {
+        console.log("bubbles on esp8266");
+
+        document.getElementById("btBubbleOn").style.backgroundColor = "red";
+        // const request = new Request(URL, {
+        //     method: 'POST',
+        //     headers: {
+        //         "Content-Type": "text/plain",
+        //     },
+        //     body: JSON.stringify({
+        //         relay: "on"
+        //     })
+        // })
+        const request = new Request(URL + "?relay=on", {
+          method: "GET",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        });
+
+        fetch(request)
+          .then((response) => console.log("response", response, response.body))
+          .catch((err) => console.log("err", err));
+      }
+
+      /////////////////////////// OFF //////////////////////////////////
+
+      function bubblesOff() {
+        console.log("bubbles off esp8266");
+        timeLeft = 0;
+        clearInterval(myTimer);
+        myTimer = null;
+        document.getElementById("btBubbleTimer").innerHTML = "ESP8266 timer";
+        document.getElementById("btBubbleOn").style.backgroundColor =
+          "lightgreen";
+        const request = new Request(URL + "?relay=off", {
+          method: "GET",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        });
+
+        fetch(request)
+          .then((response) => console.log("response", response))
+          .catch((err) => console.log("err", err));
+      }
+
+      /////////////////////////// TIMER ////////////////////////////////
+
+      function bubblesTimer() {
+        console.log("bubbles timer on esp8266");
+
+        // compte à rebours
+        clearInterval(myTimer);
+        myTimer = null;
+        const duration = document.getElementById("duration").value;
+        let timeleft = duration; // 3 minutes
+        document.getElementById("btBubbleTimer").innerHTML =
+          "STOP ! (" + timeleft + ")";
+        timeleft--;
+        myTimer = setInterval(function () {
+          if (timeleft <= 0) {
+            clearInterval(myTimer);
+            myTimer = null;
+            document.getElementById("btBubbleTimer").innerHTML =
+              "ESP8266 timer";
+            return;
+          }
+          document.getElementById("btBubbleTimer").innerHTML =
+            "STOP ! (" + timeleft + ")";
+          timeleft--;
+        }, 1000);
+
+        const request = new Request(URL + "?relay=timer&duration=" + duration, {
+          method: "GET",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          // body: JSON.stringify({
+          //     relay: "on",
+          //     duration: 3,
+          // })
+        });
+
+        fetch(request)
+          .then((response) => console.log("response", response, response.body))
+          .catch((err) => console.log("err", err));
+      }
+
+      ///////////////////////// BLINK /////////////////////////////
+
+      function bubblesBlink() {
+        console.log("bubbles blink esp8266");
+        const durationBlinkOn =
+          document.getElementById("durationBlinkOn").value;
+        const durationBlinkOff =
+          document.getElementById("durationBlinkOff").value;
+
+        const request = new Request(
+          URL +
+            "?relay=blink&durationBlinkOn=" +
+            durationBlinkOn +
+            "&durationBlinkOff=" +
+            durationBlinkOff,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "text/plain",
+            },
+          }
+        );
+
+        fetch(request)
+          .then((response) => console.log("response", response))
+          .catch((err) => console.log("err", err));
+      }
+
+      /////////////////////////////////////////////////////////////
+      ///////////////////////// IP ////////////////////////////////
+      /////////////////////////////////////////////////////////////
+
+      // ajout address mac à la db
+      async function addIP() {
+        var urlApi = "http://bubbles.frugysoft.fr/api/apiPostIP.php";
+
+        let request = new Request(urlApi, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ip: myIP,
+            action: "test",
+          }),
+        });
+
+        const response = await fetch(request);
+        console.log("post response", response);
+      }
+
+      /////////////////////////////////////////////////////////////
+
+      async function getIP() {
+        var urlApi = "http://bubbles.frugysoft.fr/api/apiGetIP.php";
+
+        let request = new Request(urlApi, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const response = await fetch(request);
+        const data = await response.json();
+        console.log("get response", data);
+      }
+
+      function getCurrentIP(json) {
+        myIP = json.ip;
+        // console.log("My public IP address is: ", json.ip);
+      }
+    </script>
+
+    <script
+      type="application/javascript"
+      src="https://api.ipify.org?format=jsonp&callback=getCurrentIP"
+    ></script>
+  </body>
+</html>
