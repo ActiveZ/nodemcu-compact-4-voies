@@ -2,8 +2,15 @@ Pour nodeMCU compact
 
 - upload fichier avec ftdi en 5 v
 - sur carte nodeMCU: shunter IO0 avec GND par jumper
-- mettre Rx sur Tx et inversement
-- ne pas oublier d'enlever le jumper à pres upload
+- mettre Rx sur Tx et inversement =>
+- gnd -> bleu
+- gnd -> jmp
+- IO0 -> jmp
+- rx -> vert
+- tx -> jaune
+- 5v -> orange
+- 
+- ne pas oublier d'enlever le jumper après upload
 
 relay -> pin 5
 LED -> pin 16
